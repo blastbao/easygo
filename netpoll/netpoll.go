@@ -3,8 +3,7 @@ Package netpoll provides a portable interface for network I/O event
 notification facility.
 
 Its API is intended for monitoring multiple file descriptors to see if I/O is
-possible on any of them. It supports edge-triggered and level-triggered
-interfaces.
+possible on any of them. It supports edge-triggered and level-triggered interfaces.
 
 To get more info you could look at operating system API documentation of
 particular netpoll implementations:
@@ -43,6 +42,7 @@ The Poller describes os-dependent network poller:
 
 Currently, Poller is implemented only for Linux.
 */
+
 package netpoll
 
 import (
@@ -70,37 +70,45 @@ var (
 	ErrNotRegistered = fmt.Errorf("file descriptor was not registered before in poller instance")
 )
 
+
+
+
+
+
+
 // Event represents netpoll configuration bit mask.
 type Event uint16
 
+
 // Event values that denote the type of events that caller want to receive.
 const (
-	EventRead  Event = 0x1
-	EventWrite       = 0x2
+	EventRead  Event = 0x1 	// 可读事件
+	EventWrite       = 0x2	// 可写事件
 )
 
 // Event values that configure the Poller's behavior.
 const (
-	EventOneShot       Event = 0x4
-	EventEdgeTriggered       = 0x8
+	EventOneShot       Event = 0x4 	// ET 模式
+	EventEdgeTriggered       = 0x8	// LT 模式
 )
 
-// Event values that could be passed to CallbackFn as additional information
-// event.
+// Event values that could be passed to CallbackFn as additional information event.
 const (
-	// EventHup is indicates that some side of i/o operations (receive, send or
-	// both) is closed.
-	// Usually (depending on operating system and its version) the EventReadHup
-	// or EventWriteHup are also set int Event value.
-	EventHup Event = 0x10
 
-	EventReadHup  = 0x20
-	EventWriteHup = 0x40
+	// EventHup is indicates that some side of i/o operations (receive, send or both) is closed.
+	// Usually (depending on operating system and its version) the EventReadHup or EventWriteHup
+	// are also set int Event value.
 
-	EventErr = 0x80
+	EventHup Event = 0x10  // 连接的某端关闭连接
 
-	// EventPollerClosed is a special Event value the receipt of which means that the
-	// Poller instance is closed.
+	EventReadHup  = 0x20   // 读端关闭
+	EventWriteHup = 0x40   // 写端关闭
+
+	EventErr = 0x80        // 错误
+
+	// EventPollerClosed is a special Event value the receipt of which means that the Poller instance is closed.
+	//
+	// EventPollerClosed 是一个特殊的 Event 值，接收到它意味着 Poller 实例已被关闭。
 	EventPollerClosed = 0x8000
 )
 
@@ -129,9 +137,11 @@ func (ev Event) String() (str string) {
 	return
 }
 
-// Poller describes an object that implements logic of polling connections for
-// i/o events such as availability of read() or write() operations.
+//Poller describes an object that implements logic of polling connections for
+//i/o events such as availability of read() or write() operations.
+
 type Poller interface {
+
 	// Start adds desc to the observation list.
 	//
 	// Note that if desc was configured with OneShot event, then poller will
@@ -144,6 +154,7 @@ type Poller interface {
 	// Note that multiple calls with same desc will produce unexpected
 	// behavior.
 	Start(*Desc, CallbackFn) error
+
 
 	// Stop removes desc from the observation list.
 	//
