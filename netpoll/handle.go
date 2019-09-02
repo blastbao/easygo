@@ -8,6 +8,7 @@ import (
 // filer describes an object that has ability to return os.File.
 type filer interface {
 	// File returns a copy of object's file descriptor.
+	// File() 返回底层文件描述符的拷贝 fd.dup() 。
 	File() (*os.File, error)
 }
 
@@ -77,6 +78,8 @@ func HandleReadWrite(conn net.Conn) (*Desc, error) {
 // Returned descriptor could be used as argument to Start(), Resume() and
 // Stop() methods of some Poller implementation.
 func Handle(conn net.Conn, event Event) (*Desc, error) {
+
+	// 把 conn 和 event 组装成 Desc 结构体。
 	desc, err := handle(conn, event)
 	if err != nil {
 		return nil, err
@@ -101,17 +104,21 @@ func HandleListener(ln net.Listener, event Event) (*Desc, error) {
 }
 
 func handle(x interface{}, event Event) (*Desc, error) {
+
+	// 判断 x 是否实现 filer 接口，也即判断 x 是否能够支持底层文件描述符 fd 的拷贝。
 	f, ok := x.(filer)
 	if !ok {
 		return nil, ErrNotFiler
 	}
 
 	// Get a copy of fd.
+	// 获取底层文件描述符 fd 的拷贝。
 	file, err := f.File()
 	if err != nil {
 		return nil, err
 	}
 
+	// 拼装结构体。
 	return &Desc{
 		file:  file,
 		event: event,

@@ -139,7 +139,9 @@ func (ev Event) String() (str string) {
 
 //Poller describes an object that implements logic of polling connections for
 //i/o events such as availability of read() or write() operations.
-
+//
+//
+//
 type Poller interface {
 
 	// Start adds desc to the observation list.
